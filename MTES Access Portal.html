@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Google Drive Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6a5cff, #4aa8ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 380px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #4a63ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #3549d1;
+        }
+        .error { color: red; margin-top: 12px; }
+        .success { color: green; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Secure Drive Access</h2>
+        <p>Enter your authentication code</p>
+
+        <input type="password" id="authCode" placeholder="Enter access code" />
+        <button onclick="validateCode()">Submit</button>
+
+        <p id="msg"></p>
+    </div>
+
+    <script>
+        // MULTIPLE VALID CODES WITH THEIR OWN LINKS
+        const ACCESS_CODES = {
+            "12345": "https://drive.google.com/drive/folders/1h1-fl_9FEn9DAUSxWIj7bzcdv7SRWfNr", // main folder
+            "abcd": "https://drive.google.com", // example
+            "premium": "https://google.com" // example
+        };
+
+        // EXPIRATION DATE (Set to future date)
+        const EXPIRATION = new Date("2025-12-9");
+
+        function validateCode() {
+            const input = document.getElementById("authCode").value.trim();
+            const msg = document.getElementById("msg");
+            msg.textContent = "";
+
+            // Check expiration
+            const now = new Date();
+            if (now > EXPIRATION) {
+                msg.textContent = "Access codes have expired.";
+                msg.className = "error";
+                return;
+            }
+
+            // Check if code exists
+            if (ACCESS_CODES[input]) {
+                msg.textContent = "Access granted. Redirecting...";
+                msg.className = "success";
+
+                // SIMPLE LOGGING (local only)
+                console.log("User accessed with code: " + input + " at " + now.toString());
+
+                setTimeout(() => {
+                    window.location.href = ACCESS_CODES[input];
+                }, 1000);
+            } else {
+                msg.textContent = "Invalid code.";
+                msg.className = "error";
+            }
+        }
+    </script>
+</body>
+</html>
