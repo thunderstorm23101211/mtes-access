@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Google Drive Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6a5cff, #4aa8ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 380px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #4a63ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #3549d1;
+        }
+        .error { color: red; margin-top: 12px; }
+        .success { color: green; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Secure Drive Access</h2>
+        <p>Enter your authentication code</p>
+
+        <input type="password" id="authCode" placeholder="Enter access code" />
+        <button onclick="validateCode()">Submit</button>
+
+        <p id="msg"></p>
+    </div>
+
+    <script>
+        // MULTIPLE VALID CODES WITH THEIR OWN LINKS
+        const ACCESS_CODES = {
+            "X7P9QF": "https://docs.google.com/spreadsheets/d/1RDn1_lckAX26_AjO51x390F1FZqp73HaArLeGqJwCHg/edit?gid=0#gid=0",
+            "M2J4ZT": "https://docs.google.com/spreadsheets/d/1vKsd_ikLCJzbq0AeaJ7is2Ds9xXmjoZnB2nxXnoodkw/edit?gid=0#gid=0",
+            "KQ81RD": "https://docs.google.com/spreadsheets/d/1gXI-SM8HyJV3Hk1c896GeNIxDlT-kn0PWyRRS_Fq8sw/edit?gid=0#gid=0",
+            "B9T6LW": "https://docs.google.com/spreadsheets/d/1BOHeW7c6sNYvhepU3Qs__FNp-TjgjQpDTJTfpTb4V8U/edit?gid=0#gid=0",
+            "R4F2XM": "https://docs.google.com/spreadsheets/d/1u7sqvLEUZbNq_ShlHnR6bjLy3KWwY316QH-KyaZ5w74/edit?gid=0#gid=0",
+            "ZP73KD": "https://docs.google.com/spreadsheets/d/1zpkQQCo1dZh00NLZ-mXYr3kJlD2Vml2Jbv76vX6Aw3Y/edit?gid=0#gid=0",
+            "H8Q1VN": "https://docs.google.com/spreadsheets/d/1ZdLktwXTzJXj-xgd21QtKUbXY8f_fdj6iOxXg3itPPM/edit?gid=0#gid=0",
+            "D2L9SY": "https://docs.google.com/spreadsheets/d/12AZyANAzGGef5XBaPiTpEqHw-4a1N_JNCUQ42srp5HE/edit?gid=0#gid=0",
+            "W6R3JP": "https://docs.google.com/spreadsheets/d/1w0ZzpOAlEGyrMiICoG5gokp4v7nCCdLxfMzRRcVwcDM/edit?gid=0#gid=0",
+            "TQ59BH": "https://docs.google.com/spreadsheets/d/13nyq9KP4-SwrEneye6AjMy5u0wnCisjJbbGu-jCo-1o/edit?gid=0#gid=0",
+            "J8M2CW": "https://docs.google.com/spreadsheets/d/1J2RxLF7rgM0GVFY90IdxWDHZOvjOOxrFSsG7Pn5s6qo/edit?gid=0#gid=0",
+            "F4Z7PQ": "https://docs.google.com/spreadsheets/d/1SBvCpKzdmMWqfEUXgZl41NXRoSO6Sy0Fd7rKQhxBk4c/edit?gid=0#gid=0",
+            "N1V6RT": "https://docs.google.com/spreadsheets/d/15blhY5RMXehV_UT0MVN4dw8wyWSG2-iYnEqMak_lqB4/edit?gid=0#gid=0",
+            "G3K8MD": "https://docs.google.com/spreadsheets/d/1AQLMGBFqdPfhBNVUfANYzKrPIzAWPXPuu1r7akTssMM/edit?gid=0#gid=0",
+            "L9S2HQ": "https://docs.google.com/spreadsheets/d/1359BZ_cjNLaEdoHhuCot5SLQhjQ6XFXQOUS61Q6MYRw/edit?gid=0#gid=0",
+            "C7P4XN": "https://docs.google.com/spreadsheets/d/1Uv8fAK_HbIb34zfX9qeZDuSDjjUJNLFb4wfyMj5n9fM/edit?gid=0#gid=0",
+            "Y5D3MV": "https://docs.google.com/spreadsheets/d/18NgRsnDWbEwf6ZwCpODgZQ0p8Q2g2uC3ef3cw20NTSA/edit?gid=0#gid=0",
+            "P2R8KT": "https://docs.google.com/spreadsheets/d/1McyYAGAJ77JYkNdrVFVp0FYlqTU99dLPigRkUZogOwE/edit?gid=0#gid=0",
+            "S6H1QW": "https://docs.google.com/spreadsheets/d/1tWv-KPRCif9J10Dwq1LBNQABOQss5ywXIVMYWAT67Qk/edit?gid=0#gid=0",
+            "U3Z9BD": "https://docs.google.com/spreadsheets/d/1GIJD33eIKeec1NmctYZtK3Ibx9eLXs3dAJhv_cPLiMQ/edit?gid=0#gid=0",
+            "A8K7LF": "https://docs.google.com/spreadsheets/d/1h-koTaDNNyOof7MWwUfNUj2MEIC0ZzGcWMxeO-PQx4Y/edit?gid=0#gid=0",
+            "V4M2JP": "https://docs.google.com/spreadsheets/d/1X8UDGVHgZjfW_pFWchHF34sNweD2XYdg1TymKuo-IJY/edit?gid=0#gid=0",
+            "Q9T1SR": "https://docs.google.com/spreadsheets/d/1g63awni3BBEmMEwzHb5y1HQ7QcSevNyg9BBM0cz_nr0/edit?gid=0#gid=0",
+            "E6W3ND": "https://docs.google.com/spreadsheets/d/1bxxz6_zBaskpOTzgY4gZDoLznhYVGrof-ObNMfIIQww/edit?gid=0#gid=0",
+            "O5F7GX": "https://docs.google.com/spreadsheets/d/1qwgZvI1Cr3Gko2EPAxvMkye65-BgxQV94jkbiVxn77M/edit?gid=0#gid=0",
+            "I2R6CP": "https://docs.google.com/spreadsheets/d/1I3-wb0vabWYo6NCw_CYGFF8e4fhQhpvouZ39-TtrEe4/edit?gid=0#gid=0",
+            "H7Z4LW": "https://docs.google.com/spreadsheets/d/11H_Zb2_AkSxiCBIKWbCuWOg6oNUE7ArxYpj0UM4_QDI/edit?gid=0#gid=0"
+        };
+
+        function validateCode() {
+            const input = document.getElementById("authCode").value.trim();
+            const msg = document.getElementById("msg");
+            msg.textContent = "";
+
+            // Check if code exists
+            if (ACCESS_CODES[input]) {
+                msg.textContent = "Access granted. Redirecting...";
+                msg.className = "success";
+
+                setTimeout(() => {
+                    window.location.href = ACCESS_CODES[input];
+                }, 800);
+            } else {
+                msg.textContent = "Invalid code.";
+                msg.className = "error";
+            }
+        }
+    </script>
+</body>
+</html>
